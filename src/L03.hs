@@ -57,7 +57,27 @@ instance Foldable T where
 --     - *Usuwanie*: Usunięcie klucza (oraz odpowiadającej mu wartości) z drzewa.  
 --     - *Aktualizacja*: Modyfikacja wartości przypisanej do klucza.  
 --     - *Balansowanie*: Zaimplementuj procedurę balansowania (np. wykorzystując algorytm drzewa 
---         AVL lub czerwono-czarnego), aby drzewo pozostało zbalansowane po operacjach wstawiania i usuwania.  
+--         AVL lub czerwono-czarnego), aby drzewo pozostało zbalansowane po operacjach wstawiania i usuwania.
+
+data BST a = EmptyBST | BST {
+    key :: String,
+    value :: a,
+    left :: BST a,
+    right :: BST a
+}
+    deriving Show
+
+insert :: String -> a -> BST a -> BST a
+insert k val EmptyBST = BST {
+    key = k,
+    value = v,
+    left = EmptyBST,
+    right = EmptyBST
+}
+insert k val BST {k1, v1, left1, right1} = 
+
+
+
 
 -- 2. **Interpreter wyrażeń z różniczkowaniem i upraszczaniem**  
 
