@@ -1,5 +1,9 @@
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module L03 where
+import Control.Exception (ArrayException(UndefinedElement))
+import Data.Bifoldable (bifoldl1)
+import GHC.Base (VecElem(Int16ElemRep))
 
 -- 5. **Znane typeclassy dla drzew** 
 --     Zdefiniuj instancje `Show, Eq, Foldable, Functor` dla parametrycznego typu danych 
@@ -59,35 +63,84 @@ instance Foldable T where
 --     - *Balansowanie*: Zaimplementuj procedurę balansowania (np. wykorzystując algorytm drzewa 
 --         AVL lub czerwono-czarnego), aby drzewo pozostało zbalansowane po operacjach wstawiania i usuwania.
 
-data BST a = EmptyBST | BST {
-    key :: String,
-    value :: a,
-    left :: BST a,
-    right :: BST a
+data BST k v = EmptyBST | BST {
+    key :: k,
+    value :: v,
+    left :: BST k v,
+    right :: BST k v
 }
     deriving Show
 
-insert :: String -> a -> BST a -> BST a
-insert k val EmptyBST = BST {
-    key = k,
-    value = v,
-    left = EmptyBST,
-    right = EmptyBST
-}
-insert k val BST {k1, v1, left1, right1} = 
+-- wstawianie
+insert :: (Ord k) => BST k v -> (k, v) -> BST k v
+insert EmptyBST (key, val) = BST key val EmptyBST EmptyBST
+insert (BST k1 v1 left1 right1) (key, val)
+    | key < k1 = BST k1 v1 (insert left1 (key, val)) right1
+    | otherwise = BST k1 v1 left1 (insert right1 (key, val))
 
+-- tworzenie drzewa z listy
+fromList :: (Ord k) => [(k, v)] -> BST k v
+fromList = foldl insert EmptyBST
 
+example2 :: BST Integer Integer
+example2 = fromList [(1,4), (8,9), (2, 4), (3, 10), (4,3)]
+
+-- wyszukiwanie
+search :: (Ord k) => BST k v -> k -> Maybe v
+search EmptyBST _ = Nothing
+search (BST k1 v1 left1 right1) key
+    | key < k1 = search left1 key
+    | key == k1 = Just v1
+    | otherwise = search right1 key
 
 
 -- 2. **Interpreter wyrażeń z różniczkowaniem i upraszczaniem**  
 
 --     Zdefiniuj algebraiczny typ danych reprezentujący wyrażenia arytmetyczne 
---     (uwzględniający zmienne, stałe, dodawanie, mnożenie i potęgowanie). Napisz funkcje, które:  
+--     (uwzględniający zmienne, stałe, dodawanie, mnożenie). Napisz funkcje, które:  
 --     - *Ewaluacja*: Obliczają wartość numeryczną wyrażenia, korzystając z mapowania zmiennych na liczby.  
 --     - *Różniczkowanie*: Symbolicznie różniczkują wyrażenie względem danej zmiennej.  
 --     - *Upraszczanie*: Redukują wyrażenie do prostszej formy poprzez stosowanie uproszczeń algebraicznych 
 --     (np. eliminowanie składników zerowych, łączenie wyrazów podobnych).  
-    
+
+data Expr a = Var a | Val Int | Sum (Expr a) (Expr a) | Mul (Expr a) (Expr a)  -- wyrażenia arytmetyczne, których zmienne są typu a
+    deriving Show
+
+example3 :: Expr Char
+example3 = Sum (Mul (Var 'x') (Val 7)) (Var 'y')
+
+context :: Char -> Int
+context 'x' = 10
+context 'y' = 1
+
+exprEval :: Expr a -> (a -> Int) -> Int
+exprEval (Var x) f = f x
+exprEval (Val n) _ = n
+exprEval (Sum e1 e2) f = exprEval e1 f + exprEval e2 f
+exprEval (Mul e1 e2) f = exprEval e1 f * exprEval e2 f
+
+derivate :: (Eq a) => Expr a -> a -> Expr a
+derivate (Var y) x
+    | x == y = Val 1
+    | otherwise = Val 0
+derivate (Val _) _ = Val 0
+derivate (Sum e1 e2) x = Sum (derivate e1 x) (derivate e2 x)
+derivate (Mul e1 e2) x = Sum (Mul (derivate e1 x) e2) (Mul e1 (derivate e2 x))
+
+simplify :: Expr a -> Expr a
+simplify (Var x) = Var x
+simplify (Val n) = Val n
+simplify (Sum e1 (Val 0)) = simplify e1
+simplify (Sum (Val 0) e2) = simplify e2
+simplify (Sum (Val n) (Val m)) = Val (n + m)
+simplify (Sum e1 e2) = simplify (Sum (simplify e1) (simplify e2))
+simplify (Mul _ (Val 0)) = Val 0
+simplify (Mul (Val 0) _) = Val 0
+simplify (Mul e1 (Val 1)) = simplify e1
+simplify (Mul (Val 1) e2) = simplify e2
+simplify (Mul e1 e2) = simplify ( Mul (simplify e1) (simplify e2))
+-- ...
+
 -- 3. **Własna leniwa lista z obsługą nieskończoności**  
 
 --     Stwórz własny typ listy (np. `data MyList a = Nil | Cons a (MyList a)`), który wspiera leniwą ewaluację. 
@@ -104,8 +157,3 @@ insert k val BST {k1, v1, left1, right1} =
 --     - *Przeszukiwanie w głąb (DFS)*: Przemierzają graf, zaczynając od danego wierzchołka.  
 --     - *Wykrywanie cykli*: Sprawdzają, czy graf zawiera cykle.  
 --     - *Znajdowanie ścieżki*: Znajdują ścieżkę między dwoma wierzchołkami (jeśli taka istnieje).  
-
--- 5. **Znane typeclassy dla drzew** 
-
---     Zdefiniuj instancje `Show, Eq, Foldable, Functor` dla parametrycznego typu danych 
---     `data T a = EmptyT | LeafT a | InnerT (T a) (T a)`.
