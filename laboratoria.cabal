@@ -29,7 +29,11 @@ library
       L02
       L03
       L05
+      L06
+      L07
       Lib
+      PD1
+      PD2
   other-modules:
       Paths_laboratoria
   autogen-modules:
@@ -39,6 +43,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , mtl
   default-language: Haskell2010
 
 executable laboratoria-exe
@@ -53,6 +58,7 @@ executable laboratoria-exe
   build-depends:
       base >=4.7 && <5
     , laboratoria
+    , mtl
   default-language: Haskell2010
 
 test-suite laboratoria-test
@@ -68,4 +74,5 @@ test-suite laboratoria-test
   build-depends:
       base >=4.7 && <5
     , laboratoria
+    , mtl
   default-language: Haskell2010
