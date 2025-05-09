@@ -35,6 +35,7 @@ library
       Lib
       PD1
       PD2
+      PD3
   other-modules:
       Paths_laboratoria
   autogen-modules:
