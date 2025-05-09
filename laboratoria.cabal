@@ -31,6 +31,7 @@ library
       L05
       L06
       L07
+      L08
       Lib
       PD1
       PD2
@@ -43,7 +44,8 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
-    , mtl
+    , mtl >=2.2
+    , transformers
   default-language: Haskell2010
 
 executable laboratoria-exe
@@ -58,7 +60,8 @@ executable laboratoria-exe
   build-depends:
       base >=4.7 && <5
     , laboratoria
-    , mtl
+    , mtl >=2.2
+    , transformers
   default-language: Haskell2010
 
 test-suite laboratoria-test
@@ -74,5 +77,6 @@ test-suite laboratoria-test
   build-depends:
       base >=4.7 && <5
     , laboratoria
-    , mtl
+    , mtl >=2.2
+    , transformers
   default-language: Haskell2010
